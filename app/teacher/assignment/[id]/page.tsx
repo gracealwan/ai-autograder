@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { QRCodeSVG } from "qrcode.react";
+
 export default function AssignmentDetails() {
   const { id } = useParams();
   const [assignment, setAssignment] = useState<any | null>(null);
+  const [rubric, setRubric] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -35,6 +37,19 @@ export default function AssignmentDetails() {
       } else {
         setAssignment(data);
       }
+      // Fetch latest rubric (highest version)
+      const { data: rubricData, error: rubricError } = await supabase
+        .from("rubrics")
+        .select("rubric_json, version")
+        .eq("assignment_id", id)
+        .order("version", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (rubricError) {
+        setRubric(null);
+      } else {
+        setRubric(rubricData || null);
+      }
       setLoading(false);
     }
     fetchAssignment();
@@ -59,6 +74,13 @@ export default function AssignmentDetails() {
             {joinUrl && <QRCodeSVG value={joinUrl} height={150} width={150} className="mb-3" />}
             <div className="break-all text-blue-700 underline text-sm">{joinUrl}</div>
           </div>
+
+          {rubric && (
+            <div className="my-8">
+              <h2 className="font-semibold mb-4">Rubric (JSON, v{rubric.version}):</h2>
+              <pre className="bg-gray-100 p-3 rounded overflow-x-scroll text-black"><code>{JSON.stringify(rubric.rubric_json, null, 2)}</code></pre>
+            </div>
+          )}
 
           <button className="text-blue-600 hover:underline" onClick={() => router.back()}>
             &larr; Back to assignments
