@@ -107,7 +107,28 @@ export default function AuthForm({ mode }: AuthFormProps) {
       });
       if (signInError) throw signInError;
 
-      router.push(nextPath);
+      // --- ROLE-BASED REDIRECT ---
+      let roleToRedirect: string | null = null;
+      // 1. Try to get role from session.user.user_metadata (browser only):
+      const session = (await supabase.auth.getSession()).data.session;
+      roleToRedirect = session?.user?.user_metadata?.role ?? null;
+      // 2. If not present, fetch role from public users table:
+      if (!roleToRedirect && session?.user?.id) {
+        const { data: userRow } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        roleToRedirect = userRow?.role ?? null;
+      }
+      // 3. Redirect
+      if (roleToRedirect === "teacher") {
+        router.push("/teacher/assignment");
+      } else if (roleToRedirect === "student") {
+        router.push("/student");
+      } else {
+        router.push("/");
+      }
     } catch (err: any) {
       setError(err?.message ?? "Something went wrong");
     } finally {
