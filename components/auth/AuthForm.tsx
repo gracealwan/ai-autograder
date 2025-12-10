@@ -53,6 +53,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [role, setRole] = useState<Role>("student");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,21 +69,36 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
     try {
       if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { role },
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: { role, name },
+            emailRedirectTo: `${window.location.origin}/login`,
           },
         });
 
         if (signUpError) throw signUpError;
-        setMessage(
-          "Check your email to confirm your account. After confirming you will be redirected."
-        );
-        router.push(nextPath);
-        return;
+
+        // Mirror into public.users table immediately
+        if (signUpData?.user) {
+          await fetch("/api/user/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: signUpData.user.id,
+              email: signUpData.user.email,
+              role,
+              name,
+            }),
+          }).catch(() => {
+            /* swallow; optional best-effort */
+          });
+        }
+
+        setMessage("Check your email to confirm your account, then log in.");
+        setIsSubmitting(false);
+        return; // stay on signup page so they see the prompt
       }
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -99,33 +115,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
   };
 
-  const handleGoogle = async () => {
-    setError(null);
-    setMessage(null);
-    setIsSubmitting(true);
-
-    try {
-      const redirectTo = `${window.location.origin}/auth/callback`;
-      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
-      });
-
-      if (oauthError) throw oauthError;
-      if (!data?.url) throw new Error("Missing OAuth redirect URL");
-      window.location.href = data.url;
-    } catch (err: any) {
-      setIsSubmitting(false);
-      setError(err?.message ?? "Unable to start Google sign-in");
-    }
-  };
-
   return (
     <div className="mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-4">
@@ -139,12 +128,30 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </p>
       </div>
 
-      <div className="mb-4">
-        <p className="mb-2 text-sm font-medium text-gray-700">
-          Are you a teacher or student?
-        </p>
-        <RoleToggle value={role} onChange={setRole} />
-      </div>
+      {mode === "signup" && (
+        <div className="mb-4">
+          <p className="mb-2 text-sm font-medium text-gray-700">
+            Are you a teacher or student?
+          </p>
+          <RoleToggle value={role} onChange={setRole} />
+        </div>
+      )}
+
+      {mode === "signup" && (
+        <div className="space-y-1">
+          <label className="block text-sm font-medium text-gray-700">
+            Name
+          </label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Jane Doe"
+          />
+        </div>
+      )}
 
       <form className="space-y-4" onSubmit={handleEmailAuth}>
         <div className="space-y-1">
@@ -156,7 +163,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="you@example.com"
           />
         </div>
@@ -171,7 +178,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="••••••••"
           />
         </div>
@@ -188,44 +195,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
             : "Log in"}
         </button>
       </form>
-
-      <div className="my-4 flex items-center gap-3 text-xs text-gray-500">
-        <div className="h-px flex-1 bg-gray-200" />
-        <span>or</span>
-        <div className="h-px flex-1 bg-gray-200" />
-      </div>
-
-      <button
-        type="button"
-        onClick={handleGoogle}
-        disabled={isSubmitting}
-        className="flex w-full items-center justify-center gap-2 rounded border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        <svg
-          className="h-4 w-4"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path
-            fill="#EA4335"
-            d="M12 10.2v3.7h5.3c-.2 1.2-.9 2.2-1.9 2.9l3.1 2.4c1.8-1.7 2.8-4.1 2.8-6.9 0-.7-.1-1.3-.2-2H12z"
-          />
-          <path
-            fill="#34A853"
-            d="M6.6 14.3l-.8.6-2.4 1.8C4.9 19.9 8.2 22 12 22c2.4 0 4.5-.8 6-2.2l-3.1-2.4c-.8.5-1.8.8-2.9.8-2.2 0-4.1-1.5-4.8-3.5z"
-          />
-          <path
-            fill="#4A90E2"
-            d="M3.4 7.1C2.5 8.7 2 10.5 2 12s.5 3.3 1.4 4.9l3.8-3c-.2-.5-.3-1-.3-1.6s.1-1.1.3-1.6l-3.8-3z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M12 5.5c1.3 0 2.4.4 3.3 1.3l2.5-2.5C16.5 2.5 14.4 1.6 12 1.6 8.2 1.6 4.9 3.7 3.4 7.1l3.8 3C7.9 7 9.8 5.5 12 5.5z"
-          />
-        </svg>
-        Continue with Google
-      </button>
 
       {error && (
         <p className="mt-3 text-sm text-red-600" role="alert">
