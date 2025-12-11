@@ -59,7 +59,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const nextPath = searchParams.get("next") ?? "/";
+  const nextParam = searchParams.get("next");
+  const nextPath = nextParam && nextParam !== "" ? nextParam : null;
 
   const handleEmailAuth = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -122,7 +123,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
         roleToRedirect = userRow?.role ?? null;
       }
       // 3. Redirect
-      if (roleToRedirect === "teacher") {
+      if (roleToRedirect === "student" && nextPath?.startsWith("/student/assignment/")) {
+        // Student came from a specific assignment link; send them back there.
+        router.push(nextPath);
+      } else if (roleToRedirect === "teacher") {
         router.push("/teacher/assignment");
       } else if (roleToRedirect === "student") {
         router.push("/student");
