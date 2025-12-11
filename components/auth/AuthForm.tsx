@@ -137,7 +137,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-md card-elevated">
+    <div className="mx-auto w-full max-w-md card-elevated p-6 md:p-8">
       <div className="mb-4">
         <h1 className="text-2xl font-semibold text-primary">
           {mode === "signup" ? "Create your account" : "Welcome back"}
