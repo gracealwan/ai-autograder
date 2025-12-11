@@ -38,14 +38,11 @@ const Whiteboard = forwardRef(function Whiteboard(
   ref
 ) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [strokes, setStrokes] = useState<Stroke[]>(() => (Array.isArray(initialStrokes) ? initialStrokes : []));
+  const [strokes, setStrokes] = useState<Stroke[]>(() =>
+    Array.isArray(initialStrokes) ? initialStrokes : []
+  );
   const [drawing, setDrawing] = useState(false);
   const currentStroke = useRef<Stroke | null>(null);
-
-  useEffect(() => {
-    setStrokes(Array.isArray(initialStrokes) ? initialStrokes : []);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialStrokes]);
 
   // Draw all strokes + in-progress
   function drawAll(tempCurrent: Stroke | null = null) {

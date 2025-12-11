@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## AI Autograder
 
-## Getting Started
+An AI-assisted grading tool that lets teachers create programming/short-answer assignments, define or generate rubrics with LLMs, and automatically grade student submissions using Supabase-backed storage and OpenRouter models.
 
-First, run the development server:
+### Tech Stack
+
+- **Framework**: Next.js (App Router, TypeScript)
+- **UI**: React, Tailwind CSS
+- **Auth & Database**: Supabase (PostgreSQL, RLS)
+- **AI**: OpenRouter-hosted LLMs (via `lib/openrouter.ts`)
+
+### Core Functionality
+
+- **Teacher flows**
+  - Create and manage assignments and questions under `app/teacher/assignment`.
+  - Generate or edit grading rubrics via AI (`app/api/rubrics/generate` and `app/api/rubrics/edit` using `prompts/rubric_generation.txt`).
+  - Trigger grading for individual questions (`app/api/grade/question`) and view grading progress (`app/api/assignment/progress`).
+- **Student flows**
+  - See assigned work from the student dashboard (`app/student`).
+  - Open an assignment, write answers, and submit solutions.
+- **Backend**
+  - Supabase stores users, assignments, submissions, and rubric data (schemas in `docs/db.sql` and `docs/db_rls.sql`).
+  - RLS policies ensure students and teachers can only access their own data.
+
+### Prerequisites
+
+- **Node.js** 18+ and **npm**
+- A **Supabase** project with:
+  - Database initialized from `docs/db.sql`
+  - RLS policies from `docs/db_rls.sql`
+- An **OpenRouter** API key
+
+### Environment Variables
+
+Create a `.env.local` file in the project root with at least:
+
+```bash
+# Supabase (browser)
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Supabase (server-side admin)
+SUPABASE_URL=your-supabase-url
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+
+# OpenRouter
+OPENROUTER_API_KEY=your-openrouter-api-key
+```
+
+### Running Locally
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then visit `http://localhost:3000` in your browser to use the app as a teacher or student (depending on how you wire up Supabase auth roles). 
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

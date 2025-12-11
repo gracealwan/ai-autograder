@@ -34,7 +34,19 @@ export default function Navbar() {
       setRole(userRole);
     };
 
+    // Initial load on mount
     loadRole();
+
+    // Keep role in sync with auth state (e.g. after login/logout)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      loadRole();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const isTeacher = role === "teacher";

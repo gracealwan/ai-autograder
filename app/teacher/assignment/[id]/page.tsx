@@ -73,7 +73,7 @@ export default function AssignmentDetails() {
           {/* Back link */}
           <button
             className="mb-4 text-sm font-medium text-secondary hover:text-primary hover:underline"
-            onClick={() => router.back()}
+            onClick={() => router.push("/teacher/assignment")}
           >
             &larr; Back to assignments
           </button>
@@ -117,10 +117,42 @@ export default function AssignmentDetails() {
             </div>
           </div>
 
+          {/* Share link + QR for students (always visible on teacher side) */}
+          {joinUrl && (
+            <div className="mb-8 flex flex-col items-center md:items-end">
+              <div className="flex flex-col items-center md:items-end">
+                <h2 className="mb-2 text-sm font-semibold text-primary">
+                  Share with students
+                </h2>
+                <QRCodeSVG
+                  value={joinUrl}
+                  height={150}
+                  width={150}
+                  className="mb-3"
+                />
+                <button
+                  type="button"
+                  className="break-all text-left text-sm text-accent underline"
+                  onClick={() => {
+                    if (typeof navigator !== "undefined" && navigator.clipboard) {
+                      navigator.clipboard.writeText(joinUrl).catch(() => {
+                        // ignore copy failures
+                      });
+                    }
+                  }}
+                >
+                  {joinUrl}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Main tab content */}
-          {/* Main tab content */}
-          {activeTab === 'results' ? (
-            <ResultsTable assignmentId={assignment.id} rubric={rubrics[selectedRubricIdx]} joinUrl={joinUrl} />
+          {activeTab === "results" ? (
+            <ResultsTable
+              assignmentId={assignment.id}
+              rubric={rubrics[selectedRubricIdx]}
+            />
           ) : (
             <div>
               {rubrics.length === 0 ? (
@@ -297,7 +329,7 @@ function RubricViewer({ rubric, latest, assignmentId, onRubricSaved }: { rubric:
   );
 }
 
-function ResultsTable({ assignmentId, rubric, joinUrl }: { assignmentId: string, rubric: any, joinUrl: string }) {
+function ResultsTable({ assignmentId, rubric }: { assignmentId: string; rubric: any }) {
   const [progress, setProgress] = React.useState<any[]>([]);
   const [uiProgress, setUiProgress] = React.useState<any[]>([]); // used for display while loading new data
   const [initialLoad, setInitialLoad] = React.useState(true);
@@ -380,12 +412,6 @@ function ResultsTable({ assignmentId, rubric, joinUrl }: { assignmentId: string,
 
   return (
     <div>
-      {/* QR code + link */}
-      <div className="my-8 flex flex-col items-center">
-        <h2 className="mb-2 text-sm font-semibold text-primary">Share with students</h2>
-        {joinUrl && <QRCodeSVG value={joinUrl} height={150} width={150} className="mb-3" />}
-        <div className="break-all text-sm text-accent underline">{joinUrl}</div>
-      </div>
       <div className="mb-3 flex items-center gap-4">
         <button
           onClick={fetchProgress}

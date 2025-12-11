@@ -74,7 +74,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           password,
           options: {
             data: { role, name },
-            emailRedirectTo: `${window.location.origin}/login`,
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
           },
         });
 

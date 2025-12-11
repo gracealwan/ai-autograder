@@ -124,11 +124,6 @@ export default function StudentAssignment() {
   const whiteboardRef = useRef<any>(null);
 
   const currentKey = `Q${currentQuestionIdx + 1}`;
-  const memoizedInitialStrokes = useRef<any[]>(workJson[currentKey]?.strokes || []);
-  useEffect(() => {
-    // When the user changes question, update the memoized strokes (keep last drawn until questionKey really changes)
-    memoizedInitialStrokes.current = workJson[currentKey]?.strokes || [];
-  }, [currentKey]);
 
   const syncWhiteboardToWorkJson = useCallback(() => {
     if (!whiteboardRef.current || typeof whiteboardRef.current.getCurrentData !== 'function') return;
@@ -224,15 +219,48 @@ export default function StudentAssignment() {
       setStarting(false);
       return;
     }
+
+    // Mark as started locally
     setHasStarted(true);
     setSubmissionId(data.id);
-    setStarting(false);
+
+    // After a submission exists, RLS allows the student to read the rubric.
+    // Refetch the latest rubric so questions are available immediately
+    // without requiring a manual page refresh.
+    try {
+      const { data: rubricRow, error: rubricErr } = await supabase
+        .from("rubrics")
+        .select("rubric_json")
+        .eq("assignment_id", id)
+        .order("version", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (rubricErr) {
+        // Don't block the flow on rubric errors; just surface a message.
+        setError(rubricErr.message);
+      } else if (rubricRow && rubricRow.rubric_json?.questions) {
+        setRubric(rubricRow.rubric_json);
+        setQuestions(rubricRow.rubric_json.questions);
+      }
+    } finally {
+      setStarting(false);
+    }
   }
 
-  const staticHandle = useCallback((data: any) => {
-    const key = `Q${currentQuestionIdx + 1}`;
-    setWorkJson((prev: any) => ({ ...prev, [key]: { strokes: data.strokes, width: data.width, height: data.height } }));
-  }, []);
+  const staticHandle = useCallback(
+    (data: any) => {
+      setWorkJson((prev: any) => ({
+        ...prev,
+        [currentKey]: {
+          strokes: data.strokes,
+          width: data.width,
+          height: data.height,
+        },
+      }));
+    },
+    [currentKey]
+  );
 
   if (loading) return <div className="p-8 text-center text-secondary">Loading…</div>;
   if (error) return <div className="p-8 text-center text-status-needs-help">{error}</div>;
