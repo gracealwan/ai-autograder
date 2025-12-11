@@ -26,7 +26,10 @@ export function getSupabaseBrowserClient(): SupabaseClient {
         auth: {
           persistSession: true,
           autoRefreshToken: true,
-          detectSessionInUrl: true,
+          // Do NOT automatically create a session from URL params.
+          // This prevents the email verification redirect (e.g. to /login)
+          // from treating the user as "logged in" before they explicitly sign in.
+          detectSessionInUrl: false,
         },
       }
     );

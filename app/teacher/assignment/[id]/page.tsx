@@ -13,6 +13,7 @@ export default function AssignmentDetails() {
   const [selectedRubricIdx, setSelectedRubricIdx] = useState<number>(0); // index in rubrics array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'results' | 'rubric'>('results');
 
@@ -130,19 +131,61 @@ export default function AssignmentDetails() {
                   width={150}
                   className="mb-3"
                 />
-                <button
-                  type="button"
-                  className="break-all text-left text-sm text-accent underline"
-                  onClick={() => {
-                    if (typeof navigator !== "undefined" && navigator.clipboard) {
-                      navigator.clipboard.writeText(joinUrl).catch(() => {
-                        // ignore copy failures
-                      });
-                    }
-                  }}
-                >
-                  {joinUrl}
-                </button>
+                <div className="flex items-center gap-2">
+                  <div className="max-w-xs break-all text-left text-sm text-accent hover:underline">
+                    {joinUrl}
+                  </div>
+                  <button
+                    type="button"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-status-excellent/40 bg-status-excellent-soft text-xs text-status-excellent shadow-sm hover:bg-status-excellent-soft/80"
+                    onClick={() => {
+                      if (typeof navigator !== "undefined" && navigator.clipboard) {
+                        navigator.clipboard.writeText(joinUrl).then(
+                          () => {
+                            setCopied(true);
+                            window.setTimeout(() => setCopied(false), 1800);
+                          },
+                          () => {
+                            // ignore copy failures
+                          }
+                        );
+                      }
+                    }}
+                    aria-label={copied ? "Copied link" : "Copy link"}
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <rect
+                        x="7"
+                        y="3"
+                        width="9"
+                        height="12"
+                        rx="2"
+                        className="stroke-current"
+                        strokeWidth="1.4"
+                      />
+                      <rect
+                        x="4"
+                        y="6"
+                        width="9"
+                        height="11"
+                        rx="2"
+                        className="stroke-current"
+                        strokeWidth="1.4"
+                        opacity="0.7"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                {copied && (
+                  <div className="mt-1 text-xs text-muted">
+                    Copied link to clipboard
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -403,10 +446,6 @@ function ResultsTable({ assignmentId, rubric }: { assignmentId: string; rubric: 
       return () => document.removeEventListener("mousedown", handleClick);
     }
   }, [drawer]);
-
-  if (initialLoad && !uiProgress.length) return <div className="py-6 text-secondary">Loading progress…</div>;
-  if (error) return <div className="text-status-needs-help">Error: {error}</div>;
-  if (!uiProgress.length) return <div className="py-6 text-sm italic text-muted">No students currently working on this assignment.</div>;
   const numQuestions = rubric?.rubric_json?.questions?.length ?? (uiProgress[0]?.questions?.length ?? 0);
   console.log("progress", JSON.stringify(uiProgress));
 
@@ -423,7 +462,16 @@ function ResultsTable({ assignmentId, rubric }: { assignmentId: string; rubric: 
           Last updated: {lastUpdate ? lastUpdate.toLocaleTimeString() : "never"}
         </span>
       </div>
-      <div className="overflow-x-auto">
+      {initialLoad && !uiProgress.length ? (
+        <div className="py-6 text-secondary">Loading progress…</div>
+      ) : error ? (
+        <div className="text-status-needs-help">Error: {error}</div>
+      ) : !uiProgress.length ? (
+        <div className="py-6 text-sm italic text-muted">
+          No students currently working on this assignment.
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
         <table className="min-w-full rounded-xl border border-border-subtle bg-surface text-center shadow-md">
           <thead className="bg-surface-soft text-secondary">
             <tr>
@@ -586,6 +634,7 @@ function ResultsTable({ assignmentId, rubric }: { assignmentId: string; rubric: 
           </tbody>
         </table>
       </div>
+      )}
       {wbPopup && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
