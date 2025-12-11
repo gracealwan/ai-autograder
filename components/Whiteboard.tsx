@@ -21,6 +21,7 @@ interface WhiteboardProps {
     height: number;
     pngDataUrl: string;
   }) => void;
+  readOnly?: boolean;
 }
 
 const DEFAULT_WIDTH = 600;
@@ -32,6 +33,7 @@ const Whiteboard = forwardRef(function Whiteboard(
     height = DEFAULT_HEIGHT,
     initialStrokes = [],
     onAutosave,
+    readOnly = false,
   }: WhiteboardProps,
   ref
 ) {
@@ -39,6 +41,11 @@ const Whiteboard = forwardRef(function Whiteboard(
   const [strokes, setStrokes] = useState<Stroke[]>(() => (Array.isArray(initialStrokes) ? initialStrokes : []));
   const [drawing, setDrawing] = useState(false);
   const currentStroke = useRef<Stroke | null>(null);
+
+  useEffect(() => {
+    setStrokes(Array.isArray(initialStrokes) ? initialStrokes : []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialStrokes]);
 
   // Draw all strokes + in-progress
   function drawAll(tempCurrent: Stroke | null = null) {
@@ -171,17 +178,19 @@ const Whiteboard = forwardRef(function Whiteboard(
         width={width} height={height}
         className="border bg-white touch-none cursor-crosshair select-none"
         style={{ width: width, height: height, display: "block" }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onMouseDown={!readOnly ? handleMouseDown : undefined}
+        onMouseMove={!readOnly ? handleMouseMove : undefined}
+        onMouseUp={!readOnly ? handleMouseUp : undefined}
+        onMouseLeave={!readOnly ? handleMouseUp : undefined}
+        onTouchStart={!readOnly ? handleTouchStart : undefined}
+        onTouchMove={!readOnly ? handleTouchMove : undefined}
+        onTouchEnd={!readOnly ? handleTouchEnd : undefined}
       />
-      <button type="button" className="absolute right-3 top-3 text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={clearBoard}>
-        Clear
-      </button>
+      {!readOnly && (
+        <button type="button" className="absolute right-3 top-3 text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={clearBoard}>
+          Clear
+        </button>
+      )}
     </div>
   );
 });
