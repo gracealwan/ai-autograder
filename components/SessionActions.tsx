@@ -21,7 +21,8 @@ function LogoutButton({
     await fetch("/api/auth/logout", { method: "POST" });
     setLoading(false);
     afterLogout?.();
-    router.refresh();
+    // After logging out, send the user to the main login screen.
+    router.push("/login");
   };
 
   return (
