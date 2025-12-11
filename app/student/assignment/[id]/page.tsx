@@ -27,6 +27,7 @@ export default function StudentAssignment() {
   const [grading, setGrading] = useState<'idle' | 'grading' | 'success' | 'error'>("idle");
   const [gradeResult, setGradeResult] = useState<any | null>(null);
   const [gradeError, setGradeError] = useState<string | null>(null);
+  const [showAIFeedbackNotice, setShowAIFeedbackNotice] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -120,6 +121,18 @@ export default function StudentAssignment() {
     }, 5000);
     return () => clearInterval(interval);
   }, [hasStarted, submissionId, workJson, currentQuestionIdx]);
+
+  // Show a notice that AI feedback is turned off once the student is in the assignment,
+  // and automatically hide it after a few seconds.
+  useEffect(() => {
+    if (hasStarted) {
+      setShowAIFeedbackNotice(true);
+      const timer = setTimeout(() => {
+        setShowAIFeedbackNotice(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasStarted]);
 
   const whiteboardRef = useRef<any>(null);
 
@@ -268,6 +281,25 @@ export default function StudentAssignment() {
 
   return (
     <div className="page-container">
+      {hasStarted && showAIFeedbackNotice && (
+        <div className="fixed inset-x-0 top-4 z-50 flex justify-center">
+          <div className="flex max-w-md items-start gap-3 rounded-lg border border-border-subtle bg-surface px-4 py-3 text-sm shadow-lg">
+            <div>
+              <p className="font-medium text-primary">AI feedback is currently turned off</p>
+              <p className="text-xs text-secondary">
+                You won&apos;t receive instant AI-generated scores or comments on this assignment. Your teacher will review your work.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="ml-2 text-xs text-secondary hover:text-primary"
+              onClick={() => setShowAIFeedbackNotice(false)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
       {hasStarted && (
         <div className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">
           {assignment.title}
