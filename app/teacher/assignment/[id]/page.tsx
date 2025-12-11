@@ -63,56 +63,88 @@ export default function AssignmentDetails() {
   const joinUrl = typeof window !== "undefined" && id ? `${window.location.origin}/student/assignment/${id}` : '';
 
   return (
-    <div className="flex flex-col items-center py-12">
+    <div className="page-container">
       {loading ? (
-        <div>Loading...</div>
+        <div className="py-10 text-center text-secondary">Loading assignment…</div>
       ) : error ? (
-        <div className="text-red-500">{error}</div>
+        <div className="text-status-needs-help">{error}</div>
       ) : assignment ? (
-        <div className="w-full max-w-4xl p-4 border rounded bg-white">
+        <div className="mx-auto w-full max-w-5xl card-elevated p-6 md:p-8">
+          {/* Back link */}
+          <button
+            className="mb-4 text-sm font-medium text-secondary hover:text-primary hover:underline"
+            onClick={() => router.back()}
+          >
+            &larr; Back to assignments
+          </button>
+
           {/* Header: title, description, toggle buttons */}
-          <div className="flex flex-col gap-2 mb-6">
-            <h1 className="text-3xl font-bold">{assignment.title}</h1>
-            <p className="text-gray-700">{assignment.description}</p>
-            <div className="flex gap-4 mt-2">
-              <button
-                onClick={() => setActiveTab('results')}
-                className={`px-4 py-1 rounded font-medium border-b-2 transition-all ${activeTab === 'results' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-blue-600'}`}
-              >
-                Results
-              </button>
-              <button
-                onClick={() => setActiveTab('rubric')}
-                className={`px-4 py-1 rounded font-medium border-b-2 transition-all ${activeTab === 'rubric' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-blue-600'}`}
-              >
-                Rubric
-              </button>
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                Assignment
+              </p>
+              <h1 className="mt-1 text-2xl font-semibold text-primary md:text-3xl">
+                {assignment.title}
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-secondary">
+                {assignment.description}
+              </p>
+            </div>
+            <div className="mt-1 flex items-center gap-2 md:mt-0">
+              <div className="inline-flex items-center rounded-full border border-border-subtle bg-surface-soft p-1 text-xs font-medium text-muted shadow-sm">
+                <button
+                  onClick={() => setActiveTab("results")}
+                  className={`chip-soft ${
+                    activeTab === "results"
+                      ? "bg-accent text-white shadow-sm"
+                      : "bg-surface-soft text-secondary hover:bg-surface"
+                  }`}
+                >
+                  Results
+                </button>
+                <button
+                  onClick={() => setActiveTab("rubric")}
+                  className={`chip-soft ${
+                    activeTab === "rubric"
+                      ? "bg-accent text-white shadow-sm"
+                      : "bg-surface-soft text-secondary hover:bg-surface"
+                  }`}
+                >
+                  Rubric
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Main tab content will be added in next steps */}
+          {/* Main tab content */}
+          {/* Main tab content */}
           {activeTab === 'results' ? (
             <ResultsTable assignmentId={assignment.id} rubric={rubrics[selectedRubricIdx]} joinUrl={joinUrl} />
           ) : (
             <div>
               {rubrics.length === 0 ? (
-                <div className="italic text-gray-500">No rubric found for this assignment.</div>
+                <div className="py-4 text-sm italic text-muted">No rubric found for this assignment.</div>
               ) : (
                 <>
-                  <div className="flex items-center gap-4 mb-2">
-                    <span className="text-gray-700 text-sm">Rubric version:</span>
+                  <div className="mb-2 flex items-center gap-4">
+                    <span className="text-sm text-secondary">Rubric version:</span>
                     <select
                       value={selectedRubricIdx}
                       onChange={e => setSelectedRubricIdx(Number(e.target.value))}
-                      className="border rounded px-2 py-1 text-sm bg-white"
+                      className="rounded-full border border-border-subtle bg-surface px-3 py-1 text-sm text-secondary shadow-sm"
                     >
                       {rubrics.map((r, idx) => (
                         <option key={r.version} value={idx}>
-                          v{r.version} {idx === 0 ? '(latest)' : ''}
+                          v{r.version} {idx === 0 ? "(latest)" : ""}
                         </option>
                       ))}
                     </select>
-                    <span className="text-xs text-gray-500">{rubrics[selectedRubricIdx]?.generated_at ? `Created ${new Date(rubrics[selectedRubricIdx].generated_at).toLocaleString()}` : ''}</span>
+                    <span className="text-xs text-muted">
+                      {rubrics[selectedRubricIdx]?.generated_at
+                        ? `Created ${new Date(rubrics[selectedRubricIdx].generated_at).toLocaleString()}`
+                        : ""}
+                    </span>
                   </div>
                   <RubricViewer
                     rubric={rubrics[selectedRubricIdx]}
@@ -124,10 +156,6 @@ export default function AssignmentDetails() {
               )}
             </div>
           )}
-
-          <button className="text-blue-600 hover:underline mt-10" onClick={() => router.back()}>
-            &larr; Back to assignments
-          </button>
         </div>
       ) : null}
     </div>
@@ -166,8 +194,15 @@ function RubricViewer({ rubric, latest, assignmentId, onRubricSaved }: { rubric:
   if (!latest) {
     return (
       <div className="my-8">
-        <h2 className="font-semibold mb-2">Rubric (read-only, v{rubric.version})</h2>
-        <pre className="w-full bg-gray-100 rounded p-3 mb-2 text-black font-mono text-sm border overflow-x-auto" style={{ minHeight: '180px' }}>{rubricToPrettyString(rubric.rubric_json)}</pre>
+        <h2 className="mb-2 text-sm font-semibold text-primary">
+          Rubric (read-only, v{rubric.version})
+        </h2>
+        <pre
+          className="w-full rounded-lg border border-border-subtle bg-surface-soft p-3 mb-2 font-mono text-sm text-primary overflow-x-auto"
+          style={{ minHeight: "180px" }}
+        >
+          {rubricToPrettyString(rubric.rubric_json)}
+        </pre>
       </div>
     );
   }
@@ -208,9 +243,11 @@ function RubricViewer({ rubric, latest, assignmentId, onRubricSaved }: { rubric:
 
   return (
     <div className="my-8">
-      <h2 className="font-semibold mb-4">Edit Rubric (v{rubric.version})</h2>
+      <h2 className="mb-4 text-sm font-semibold text-primary">
+        Edit rubric (v{rubric.version})
+      </h2>
       <textarea
-        className="w-full bg-gray-100 rounded p-3 text-black font-mono mb-2 text-sm border"
+        className="w-full rounded-lg border border-border-subtle bg-surface-soft p-3 mb-2 font-mono text-sm text-primary"
         rows={18}
         value={editValue}
         onChange={handleChange}
@@ -220,23 +257,38 @@ function RubricViewer({ rubric, latest, assignmentId, onRubricSaved }: { rubric:
       />
       <div className="flex gap-4 items-center mt-2">
         <button
-          className={`bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50`}
+          className="btn-primary px-4 py-2 disabled:opacity-50"
           onClick={handleSave}
           disabled={!dirty || saving}
         >
           {saving ? 'Saving...' : 'Save'}
         </button>
-        {dirty && <span className="text-xs text-gray-600">Don't forget to save!</span>}
-        {error && <div className="text-red-500 text-xs ml-4">{error}</div>}
+        {dirty && <span className="text-xs text-muted">Don't forget to save!</span>}
+        {error && <div className="ml-4 text-xs text-status-needs-help">{error}</div>}
       </div>
       {showWarning && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-sm">
-            <div className="font-bold text-lg mb-2 text-yellow-600">Regrade Trigger Warning</div>
-            <p className="mb-4">Saving a new version of the rubric will trigger a regrade for all submissions. Are you sure you want to continue?</p>
+          <div className="card-elevated max-w-sm p-6">
+            <div className="mb-2 text-lg font-bold text-status-okay">
+              Regrade trigger warning
+            </div>
+            <p className="mb-4 text-sm text-secondary">
+              Saving a new version of the rubric will trigger a regrade for all submissions. Are you
+              sure you want to continue?
+            </p>
             <div className="flex gap-3 justify-end mt-2">
-              <button className="px-4 py-1 rounded bg-gray-200" onClick={() => setShowWarning(false)}>Cancel</button>
-              <button className="px-4 py-1 rounded bg-blue-600 text-white" onClick={confirmSave}>Yes, Save</button>
+              <button
+                className="btn-secondary px-4 py-1"
+                onClick={() => setShowWarning(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-primary px-4 py-1"
+                onClick={confirmSave}
+              >
+                Yes, save
+              </button>
             </div>
           </div>
         </div>
@@ -320,9 +372,9 @@ function ResultsTable({ assignmentId, rubric, joinUrl }: { assignmentId: string,
     }
   }, [drawer]);
 
-  if (initialLoad && !uiProgress.length) return <div>Loading progress...</div>;
-  if (error) return <div className="text-red-500">Error: {error}</div>;
-  if (!uiProgress.length) return <div className="italic text-gray-500">No students currently working on this assignment.</div>;
+  if (initialLoad && !uiProgress.length) return <div className="py-6 text-secondary">Loading progress…</div>;
+  if (error) return <div className="text-status-needs-help">Error: {error}</div>;
+  if (!uiProgress.length) return <div className="py-6 text-sm italic text-muted">No students currently working on this assignment.</div>;
   const numQuestions = rubric?.rubric_json?.questions?.length ?? (uiProgress[0]?.questions?.length ?? 0);
   console.log("progress", JSON.stringify(uiProgress));
 
@@ -330,46 +382,82 @@ function ResultsTable({ assignmentId, rubric, joinUrl }: { assignmentId: string,
     <div>
       {/* QR code + link */}
       <div className="my-8 flex flex-col items-center">
-        <h2 className="font-semibold mb-2">Share with Students:</h2>
+        <h2 className="mb-2 text-sm font-semibold text-primary">Share with students</h2>
         {joinUrl && <QRCodeSVG value={joinUrl} height={150} width={150} className="mb-3" />}
-        <div className="break-all text-blue-700 underline text-sm">{joinUrl}</div>
+        <div className="break-all text-sm text-accent underline">{joinUrl}</div>
       </div>
-      <div className="flex items-center mb-3 gap-4">
-        <button onClick={fetchProgress} className="px-3 py-1 rounded bg-blue-600 text-white font-medium hover:bg-blue-700">Refresh Now</button>
-        <span className="text-sm text-gray-500">Last updated: {lastUpdate ? lastUpdate.toLocaleTimeString() : 'never'}</span>
+      <div className="mb-3 flex items-center gap-4">
+        <button
+          onClick={fetchProgress}
+          className="btn-secondary"
+        >
+          Refresh now
+        </button>
+        <span className="text-sm text-muted">
+          Last updated: {lastUpdate ? lastUpdate.toLocaleTimeString() : "never"}
+        </span>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full border text-center bg-white rounded shadow">
-          <thead className="bg-blue-50 font-semibold">
+        <table className="min-w-full rounded-xl border border-border-subtle bg-surface text-center shadow-md">
+          <thead className="bg-surface-soft text-secondary">
             <tr>
-              <th className="border px-2 py-1">Student</th>
+              <th className="border border-border-subtle px-2 py-2 text-xs font-semibold uppercase tracking-wide">
+                Student
+              </th>
               {[...Array(numQuestions)].map((_, i) => (
-                <th key={i} className="border px-2 py-1">Q{i+1}</th>
+                <th
+                  key={i}
+                  className="border border-border-subtle px-2 py-1 text-xs font-semibold uppercase tracking-wide"
+                >
+                  Q{i + 1}
+                </th>
               ))}
-              <th className="border px-2 py-1">Total</th>
+              <th className="border border-border-subtle px-2 py-1 text-xs font-semibold uppercase tracking-wide">
+                Total
+              </th>
             </tr>
           </thead>
           <tbody>
             {uiProgress.map((row, i) => (
               <React.Fragment key={row.student_id + i}>
-                <tr className="hover:bg-blue-50">
-                  <td className="border px-2 py-1 font-medium text-left">{row.student_name}</td>
+                <tr className="hover:bg-surface-soft">
+                  <td className="border border-border-subtle px-2 py-1 text-left text-sm font-medium text-primary">
+                    {row.student_name}
+                  </td>
                   {[...Array(numQuestions)].map((_, qIdx) => {
                     const qScore = row.questions?.find((q: any) => q.question_index === qIdx);
                     const expanded = drawer && drawer.i === i && drawer.qIdx === qIdx;
                     return (
                       <td
                         key={qIdx}
-                        className={`border px-2 py-1 cursor-pointer transition-all ${expanded ? 'bg-blue-200 !ring-4 !ring-blue-600 scale-105 font-bold z-10' :
-                          (!qScore ? 'bg-gray-100 text-gray-400': qScore.bucket==='green'?'bg-green-100 text-green-800':qScore.bucket==='yellow'?'bg-yellow-100 text-yellow-800':'bg-red-100 text-red-800')}`}
-                        onClick={e => { e.stopPropagation(); setDrawer(expanded ? null : { i, qIdx }); }}
+                        className={`border border-border-subtle px-2 py-1 text-sm cursor-pointer transition-all ${
+                          !qScore
+                            ? 'bg-surface-soft text-muted'
+                            : qScore.bucket === 'green'
+                              ? 'bg-status-excellent-soft text-status-excellent'
+                              : qScore.bucket === 'yellow'
+                                ? 'bg-status-okay-soft text-status-okay'
+                                : 'bg-status-needs-help-soft text-status-needs-help'
+                        } ${expanded ? 'font-semibold' : ''}`}
+                        onClick={e => {
+                          e.stopPropagation();
+                          setDrawer(expanded ? null : { i, qIdx });
+                        }}
                       >
                         {qScore ? `${qScore.score}/${qScore.max}` : '-'}
                       </td>
                     );
                   })}
-                  <td className={`border px-2 py-1 font-semibold ${row.completed && row.total_score!==null?
-                    (row.total_score/row.max_total>=.8?'text-green-700':row.total_score/row.max_total>=.6?'text-yellow-800':'text-red-700') : 'text-gray-400 font-normal'}`}
+                  <td
+                    className={`border border-border-subtle px-2 py-1 text-sm font-semibold ${
+                      row.completed && row.total_score !== null
+                        ? row.total_score / row.max_total >= 0.8
+                          ? 'text-status-excellent'
+                          : row.total_score / row.max_total >= 0.6
+                            ? 'text-status-okay'
+                            : 'text-status-needs-help'
+                        : 'text-muted font-normal'
+                    }`}
                   >
                     {row.completed&&row.total_score!==null? `${row.total_score}/${row.max_total}` : '-'}
                   </td>
@@ -377,7 +465,10 @@ function ResultsTable({ assignmentId, rubric, joinUrl }: { assignmentId: string,
                 {/* Drawer row below student*/}
                 {drawer && drawer.i === i ? (
                   <tr>
-                    <td colSpan={numQuestions+2} className="py-4 px-2 bg-blue-50 border-b relative">
+                    <td
+                      colSpan={numQuestions + 2}
+                      className="relative bg-surface-soft px-2 py-4 border-b border-border-subtle"
+                    >
                       {(() => {
                         const perfectRow = JSON.parse(JSON.stringify(row));
                         let qScore = undefined;
@@ -389,46 +480,74 @@ function ResultsTable({ assignmentId, rubric, joinUrl }: { assignmentId: string,
                             break;
                           }
                         }
-                        if (!qScore) return <div className="italic text-gray-500">No data for this question.</div>;
+                        if (!qScore) return <div className="italic text-muted">No data for this question.</div>;
                         return (
                           <div ref={drawerRef} className="relative w-full max-w-4xl mx-auto">
                             {qScore.work && qScore.work.strokes && (
-                            
                               <button
                                 type="button"
-                                className="absolute right-3 top-3 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded shadow text-xs font-semibold"
+                                className="btn-secondary absolute right-3 top-3 !px-3 !py-1 text-xs font-semibold"
                                 onClick={e => {
                                   e.stopPropagation();
-                                  setWbPopup({ studentName: row.student_name, qScore: { ...qScore, work: { ...qScore.work, strokes: [...(qScore.work?.strokes||[])] } } });
+                                  setWbPopup({
+                                    studentName: row.student_name,
+                                    qScore: {
+                                      ...qScore,
+                                      work: { ...qScore.work, strokes: [...(qScore.work?.strokes || [])] },
+                                    },
+                                  });
                                 }}
                               >
                                 Show Whiteboard
                               </button>
                             )}
-                            <div className="border rounded bg-white shadow p-3">
-                              <div className="mb-2 text-sm text-gray-600 font-medium">Feedback & Points per Goal:</div>
-                              <table className="w-full mb-2 border text-sm">
+                            <div className="card-elevated px-4 pb-4 pt-8">
+                              <div className="mb-3 text-left text-sm font-semibold text-secondary">
+                                Feedback &amp; points per goal
+                              </div>
+                              <table className="mb-2 w-full border border-border-subtle text-sm">
                                 <thead>
-                                  <tr className="bg-gray-50">
-                                    <th className="border px-2 py-1">Goal</th>
-                                    <th className="border px-2 py-1">Score</th>
-                                    <th className="border px-2 py-1">Max</th>
-                                    <th className="border px-2 py-1">Explanation</th>
+                                  <tr className="bg-surface-soft text-xs text-secondary">
+                                    <th className="border border-border-subtle px-2 py-1 text-left font-semibold">
+                                      Goal
+                                    </th>
+                                    <th className="border border-border-subtle px-2 py-1 font-semibold">
+                                      Score
+                                    </th>
+                                    <th className="border border-border-subtle px-2 py-1 font-semibold">
+                                      Max
+                                    </th>
+                                    <th className="border border-border-subtle px-2 py-1 text-left font-semibold">
+                                      Explanation
+                                    </th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {qScore.goals && qScore.goals.map((g:any, idx:number) => (
                                     <tr key={idx}>
-                                      <td className="border px-2 py-1 text-left">{g.goal}</td>
-                                      <td className="border px-2 py-1">{g.points}</td>
-                                      <td className="border px-2 py-1">{g.maxPoints}</td>
-                                      <td className="border px-2 py-1 text-left">{g.explanation}</td>
+                                      <td className="border border-border-subtle px-2 py-1 text-left text-sm text-primary">
+                                        {g.goal}
+                                      </td>
+                                      <td className="border border-border-subtle px-2 py-1 text-sm text-secondary">
+                                        {g.points}
+                                      </td>
+                                      <td className="border border-border-subtle px-2 py-1 text-sm text-secondary">
+                                        {g.maxPoints}
+                                      </td>
+                                      <td className="border border-border-subtle px-2 py-1 text-left text-sm text-secondary">
+                                        {g.explanation}
+                                      </td>
                                     </tr>
                                   ))}
                                 </tbody>
                               </table>
-                              <div className="font-medium mt-1">Overall feedback: <span className="text-gray-700">{qScore.feedback||'–'}</span></div>
-                              <div className="font-semibold mt-2">Total: {qScore.score} / {qScore.max}</div>
+                              <div className="mt-1 text-sm font-medium text-primary">
+                                Overall feedback:{" "}
+                                <span className="text-secondary">{qScore.feedback || "–"}</span>
+                              </div>
+                              <div className="mt-2 text-sm font-semibold text-primary">
+                                Total: {qScore.score} / {qScore.max}
+                              </div>
                             </div>
                           </div>
                         );
@@ -442,14 +561,31 @@ function ResultsTable({ assignmentId, rubric, joinUrl }: { assignmentId: string,
         </table>
       </div>
       {wbPopup && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div ref={wbPopupRef} className="bg-white rounded shadow-lg max-w-[700px] min-h-[500px] w-full p-6 flex flex-col justify-center items-center relative" onClick={e=>e.stopPropagation()} style={{minWidth: 650}}>
-            <button className="absolute top-3 right-3 text-lg font-bold" onClick={()=>setWbPopup(null)}>&times;</button>
-            <h2 className="font-semibold mb-3 text-lg">{wbPopup.studentName}&nbsp;– Whiteboard</h2>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setWbPopup(null)}
+        >
+          <div
+            ref={wbPopupRef}
+            className="card-elevated relative flex min-h-[500px] w-full max-w-[700px] flex-col items-center justify-center p-8"
+            onClick={e => e.stopPropagation()}
+            style={{ minWidth: 650 }}
+          >
+            <button
+              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-surface-soft text-lg font-bold text-muted shadow-sm hover:bg-surface hover:text-primary"
+              onClick={() => setWbPopup(null)}
+              aria-label="Close whiteboard"
+            >
+              &times;
+            </button>
+            <h2 className="mb-3 text-lg font-semibold text-primary self-start">
+              {wbPopup.studentName}&nbsp;– Question{" "}
+              {(wbPopup.qScore?.question_index ?? 0) + 1} Whiteboard
+            </h2>
             {wbPopup.qScore.work && wbPopup.qScore.work.strokes ? (
               <Whiteboard initialStrokes={wbPopup.qScore.work.strokes} width={600} height={400} readOnly />
             ) : (
-              <div className="italic text-gray-500">No work for this question.</div>
+              <div className="italic text-muted">No work for this question.</div>
             )}
           </div>
         </div>

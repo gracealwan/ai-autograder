@@ -19,25 +19,37 @@ export default function StudentHome() {
   }, []);
 
   return (
-    <div className="relative p-10">
-      <div className="absolute top-4 right-6">
-        <SessionActions />
-      </div>
+    <div className="page-container">
       {loading ? (
-        <div className="p-8 text-center">Loading...</div>
+        <div className="py-16 text-center text-secondary">Loading…</div>
       ) : !loggedIn ? (
-        <div className="flex flex-col items-center justify-center h-[60vh]">
-          <h2 className="mb-4 text-xl font-bold">Log in as a student</h2>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded font-semibold"
-            onClick={() => router.push("/login?next=/student")}
-          >
-            Log In
-          </button>
+        <div className="mx-auto flex h-[60vh] max-w-md flex-col items-center justify-center">
+          <div className="card-elevated w-full p-6 text-center">
+            <h2 className="mb-2 text-xl font-semibold text-primary">
+              Log in as a student
+            </h2>
+            <p className="mb-4 text-sm text-secondary">
+              Your teacher will share a link to each assignment. Log in so we can save your work.
+            </p>
+            <button
+              className="btn-primary w-full justify-center"
+              onClick={() => router.push("/login?next=/student")}
+            >
+              Log in
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center h-[60vh]">
-          <h2 className="text-xl font-medium">Wait for an Assignment link from your teacher.</h2>
+        <div className="mx-auto flex h-[60vh] max-w-md flex-col items-center justify-center">
+          <div className="card-elevated w-full p-6 text-center">
+            <h2 className="mb-2 text-xl font-semibold text-primary">
+              Waiting for an assignment
+            </h2>
+            <p className="text-sm text-secondary">
+              When your teacher starts a new diagnostic, they&apos;ll send you a link. Keep this tab
+              open and you&apos;ll be ready to join.
+            </p>
+          </div>
         </div>
       )}
     </div>

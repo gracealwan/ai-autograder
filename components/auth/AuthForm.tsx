@@ -32,10 +32,10 @@ function RoleToggle({
             key={role}
             type="button"
             onClick={() => onChange(role)}
-            className={`flex-1 rounded border px-3 py-2 text-sm transition ${
+            className={`flex-1 rounded-full border px-3 py-2 text-sm transition ${
               isActive
-                ? "border-blue-600 bg-blue-50 text-blue-700"
-                : "border-gray-300 bg-white text-gray-700 hover:border-blue-300"
+                ? "border-accent bg-accent-soft text-accent-strong shadow-sm"
+                : "border-border-subtle bg-surface text-secondary hover:border-accent-soft hover:bg-surface-soft"
             }`}
           >
             {roleLabels[role]}
@@ -137,12 +137,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="mx-auto w-full max-w-md card-elevated">
       <div className="mb-4">
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-semibold text-primary">
           {mode === "signup" ? "Create your account" : "Welcome back"}
         </h1>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted">
           {mode === "signup"
             ? "Sign up with your role to get started."
             : "Log in to continue."}
@@ -151,7 +151,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
       {mode === "signup" && (
         <div className="mb-4">
-          <p className="mb-2 text-sm font-medium text-gray-700">
+          <p className="mb-2 text-sm font-medium text-secondary">
             Are you a teacher or student?
           </p>
           <RoleToggle value={role} onChange={setRole} />
@@ -160,7 +160,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
       {mode === "signup" && (
         <div className="space-y-1">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-secondary">
             Name
           </label>
           <input
@@ -168,7 +168,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-border-subtle px-3 py-2 text-sm text-secondary placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/40 bg-surface"
             placeholder="Jane Doe"
           />
         </div>
@@ -176,7 +176,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
       <form className="space-y-4" onSubmit={handleEmailAuth}>
         <div className="space-y-1">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-secondary">
             Email
           </label>
           <input
@@ -184,13 +184,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-border-subtle px-3 py-2 text-sm text-secondary placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/40 bg-surface"
             placeholder="you@example.com"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-secondary">
             Password
           </label>
           <input
@@ -199,7 +199,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-border-subtle px-3 py-2 text-sm text-secondary placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/40 bg-surface"
             placeholder="••••••••"
           />
         </div>
@@ -207,7 +207,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+          className="flex w-full items-center justify-center rounded-full bg-accent px-3 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:bg-accent-soft"
         >
           {isSubmitting
             ? "Working..."
@@ -218,12 +218,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
       </form>
 
       {error && (
-        <p className="mt-3 text-sm text-red-600" role="alert">
+        <p className="mt-3 text-sm text-status-needs-help" role="alert">
           {error}
         </p>
       )}
       {message && (
-        <p className="mt-3 text-sm text-green-700" role="status">
+        <p className="mt-3 text-sm text-status-excellent" role="status">
           {message}
         </p>
       )}

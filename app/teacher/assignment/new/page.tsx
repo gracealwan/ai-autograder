@@ -89,13 +89,39 @@ export default function NewAssignment() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">Create New Assignment</h1>
-      <form className="w-full max-w-md bg-white rounded shadow-md p-6" onSubmit={handleSubmit}>
+    <div className="page-container">
+      <div className="mx-auto flex max-w-2xl flex-col">
+        <h1 className="mb-3 text-2xl font-semibold text-primary">
+          Create new assignment
+        </h1>
+        <p className="mb-6 text-sm text-secondary">
+          Describe the task and add your questions.
+        </p>
+        <div className="mb-6 flex items-center gap-2 text-xs text-muted">
+          <span>
+            We&apos;ll automatically generate a detailed rubric from your questions after you create the assignment.
+          </span>
+          <div className="relative inline-flex items-center group">
+            <button
+              type="button"
+              className="flex h-4 w-4 items-center justify-center rounded-full bg-surface-soft text-[10px] font-semibold text-secondary"
+              aria-label="How rubrics are generated"
+            >
+              ?
+            </button>
+            <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-64 -translate-x-1/2 rounded-lg border border-border-subtle bg-surface px-3 py-2 text-[11px] text-secondary opacity-0 shadow-md transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+              We send your questions to the AI rubric generator, which creates goals, point values, and feedback
+              criteria for each problem. You can review and edit the rubric on the next screen before using it.
+            </div>
+          </div>
+        </div>
+        <form className="card-elevated w-full p-6 md:p-8" onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block mb-2 font-semibold text-black">Assignment Name</label>
+          <label className="mb-1 block text-sm font-semibold text-secondary">
+            Assignment name
+          </label>
           <input
-            className="w-full border rounded px-3 py-2 bg-white text-black"
+            className="w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-secondary"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -103,9 +129,11 @@ export default function NewAssignment() {
           />
         </div>
         <div className="mb-6">
-          <label className="block mb-2 font-semibold text-black">Description</label>
+          <label className="mb-1 block text-sm font-semibold text-secondary">
+            Description
+          </label>
           <textarea
-            className="w-full border rounded px-3 py-2 bg-white text-black"
+            className="w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-secondary"
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -114,54 +142,86 @@ export default function NewAssignment() {
           />
         </div>
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <label className="font-semibold text-black">Questions</label>
+          <div className="mb-2 flex items-center justify-between">
+            <label className="text-sm font-semibold text-secondary">
+              Add your questions
+            </label>
             <button
               type="button"
-              className="text-xs underline text-blue-600"
+              className="inline-flex items-center gap-1 text-xs font-medium text-accent underline"
               onClick={handleUseTemplate}
               disabled={loading || rubricLoading}
             >
-              Use our template!
+              <span>Use our template</span>
+              <svg
+                className="h-3 w-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M4 4a2 2 0 012-2h3.5a1 1 0 010 2H6v3.5a1 1 0 01-2 0V4z" />
+                <path d="M16 9a1 1 0 00-1 1 4 4 0 01-4 4 1 1 0 000 2 6 6 0 006-6 1 1 0 00-1-1z" />
+                <path d="M5 11a1 1 0 011-1h3a1 1 0 110 2H7v2a1 1 0 11-2 0v-3z" />
+              </svg>
             </button>
           </div>
-          {questions.map((q, i) => (
-            <div key={i} className="flex items-start gap-2 mb-2">
-              <textarea
-                value={q}
-                onChange={e => handleQuestionChange(i, e.target.value)}
-                className="flex-1 border rounded px-3 py-2 bg-white text-black"
-                rows={2}
-                required
-                disabled={loading || rubricLoading}
-              />
-              <button
-                type="button"
-                className="mt-1 text-red-500 text-md px-2"
-                onClick={() => handleRemoveQuestion(i)}
-                disabled={questions.length === 1 || loading || rubricLoading}
-                title={questions.length === 1 ? 'At least one question required' : 'Remove question'}
-              >
-                &times;
-              </button>
-            </div>
-          ))}
+          {questions.map((q, i) => {
+            const questionLabel = `Question ${i + 1}`;
+            const disableRemove = questions.length === 1 || loading || rubricLoading;
+            return (
+              <div key={i} className="mb-3">
+                <div className="mb-1 text-xs font-medium text-muted">
+                  {questionLabel}
+                </div>
+                <div className="flex items-start gap-2">
+                  <textarea
+                    value={q}
+                    onChange={e => handleQuestionChange(i, e.target.value)}
+                    className="flex-1 rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-secondary"
+                    rows={2}
+                    required
+                    disabled={loading || rubricLoading}
+                  />
+                  <button
+                    type="button"
+                    className={`inline-flex items-center gap-1 rounded-full border border-status-needs-help/30 bg-status-needs-help-soft px-3 py-1 text-xs font-medium text-status-needs-help ${
+                      disableRemove ? "opacity-40 cursor-not-allowed" : ""
+                    }`}
+                    onClick={() => handleRemoveQuestion(i)}
+                    disabled={disableRemove}
+                    title={
+                      questions.length === 1
+                        ? "At least one question required"
+                        : "Remove question"
+                    }
+                  >
+                    <span className="text-sm leading-none">−</span>
+                    <span>Remove</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
           <button
             type="button"
-            className="mt-2 px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded"
+            className="mt-2 inline-flex items-center gap-1 rounded-full bg-accent-soft px-3 py-1 text-xs font-medium text-accent hover:bg-accent-soft/80"
             onClick={handleAddQuestion}
             disabled={loading || rubricLoading}
-          >Add Question</button>
+          >
+            <span className="text-sm leading-none">＋</span>
+            <span>Add question</span>
+          </button>
         </div>
-        {error && <div className="text-red-500 mb-4">{error}</div>}
+        {error && <div className="mb-4 text-sm text-status-needs-help">{error}</div>}
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold"
+          className="btn-primary mt-2 w-full justify-center text-base"
           disabled={loading || rubricLoading}
         >
           {loading || rubricLoading ? (rubricLoading ? "Generating rubric..." : "Creating...") : "Create Assignment"}
         </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

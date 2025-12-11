@@ -172,11 +172,11 @@ const Whiteboard = forwardRef(function Whiteboard(
   }
 
   return (
-    <div className="border rounded shadow bg-gray-50 relative w-fit p-2">
+    <div className="relative w-fit rounded-xl border border-border-subtle bg-surface-soft p-3 shadow-md">
       <canvas
         ref={canvasRef}
         width={width} height={height}
-        className="border bg-white touch-none cursor-crosshair select-none"
+        className="rounded-lg border border-border-subtle bg-surface touch-none cursor-crosshair select-none"
         style={{ width: width, height: height, display: "block" }}
         onMouseDown={!readOnly ? handleMouseDown : undefined}
         onMouseMove={!readOnly ? handleMouseMove : undefined}
@@ -187,7 +187,11 @@ const Whiteboard = forwardRef(function Whiteboard(
         onTouchEnd={!readOnly ? handleTouchEnd : undefined}
       />
       {!readOnly && (
-        <button type="button" className="absolute right-3 top-3 text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={clearBoard}>
+        <button
+          type="button"
+          className="absolute right-4 top-4 rounded-full bg-status-needs-help-soft px-3 py-1 text-xs font-medium text-status-needs-help shadow-sm hover:bg-status-needs-help-soft/80"
+          onClick={clearBoard}
+        >
           Clear
         </button>
       )}

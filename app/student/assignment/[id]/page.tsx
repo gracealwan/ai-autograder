@@ -234,39 +234,53 @@ export default function StudentAssignment() {
     setWorkJson((prev: any) => ({ ...prev, [key]: { strokes: data.strokes, width: data.width, height: data.height } }));
   }, []);
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (error) return <div className="text-red-500 p-8 text-center">{error}</div>;
+  if (loading) return <div className="p-8 text-center text-secondary">Loading…</div>;
+  if (error) return <div className="p-8 text-center text-status-needs-help">{error}</div>;
   if (!assignment) return null;
 
   return (
-    <div className="relative min-h-screen">
+    <div className="page-container">
       {hasStarted && (
-        <div className="absolute top-4 left-8 text-xl font-bold text-blue-800 z-20">{assignment.title}</div>
+        <div className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">
+          {assignment.title}
+        </div>
       )}
-      <div className="flex flex-col items-center py-12">
+      <div className="flex flex-col items-center">
         {!hasStarted ? (
-          <>
-            <h1 className="text-2xl font-bold mb-2">{assignment.title}</h1>
-            <p className="mb-6 text-gray-700">{assignment.description}</p>
-            <button
-              className="bg-green-600 text-white px-6 py-2 rounded text-lg font-semibold"
-              disabled={starting}
-              onClick={handleStart}
-            >
-              {starting ? "Starting..." : "Start Assignment"}
-            </button>
-          </>
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="card-elevated p-6 md:p-8">
+              <h1 className="mb-2 text-2xl font-semibold text-primary">
+                {assignment.title}
+              </h1>
+              <p className="mb-6 text-sm text-secondary">{assignment.description}</p>
+              <button
+                className="btn-primary w-full justify-center text-base"
+                disabled={starting}
+                onClick={handleStart}
+              >
+                {starting ? "Starting…" : "Start assignment"}
+              </button>
+            </div>
+          </div>
         ) : finalSubmitted ? (
-          <div className="text-center mt-12">
-            <h2 className="text-3xl font-semibold text-green-700 mb-6">Assignment Complete!</h2>
-            <div className="text-xl mb-4">Your work has been submitted for grading. Placeholder score/result will go here.</div>
+          <div className="mt-12 text-center">
+            <h2 className="mb-4 text-3xl font-semibold text-status-excellent">
+              Assignment complete!
+            </h2>
+            <div className="text-lg text-secondary">
+              Your work has been submitted for grading. You can close this tab.
+            </div>
           </div>
         ) : (
-          <div className="w-full flex flex-col items-center mt-12">
+          <div className="mt-8 flex w-full flex-col items-center">
             {!!questions.length && (
               <>
-                <div className="text-lg font-medium mb-2 text-gray-800">Question {currentQuestionIdx + 1} of {questions.length}</div>
-                <div className="mb-4 text-xl font-semibold">{questions[currentQuestionIdx]?.prompt}</div>
+                <div className="mb-1 text-sm font-medium text-secondary">
+                  Question {currentQuestionIdx + 1} of {questions.length}
+                </div>
+                <div className="mb-4 text-lg font-semibold text-primary text-center">
+                  {questions[currentQuestionIdx]?.prompt}
+                </div>
               
                 <div className="relative w-fit">
                   <Whiteboard
@@ -278,13 +292,17 @@ export default function StudentAssignment() {
                     onAutosave={staticHandle}
                   />
                   {/* Autosave indicator, always show green unless error */}
-                  <div style={{position: 'absolute', right: 16, bottom: 16, pointerEvents: 'auto', zIndex: 20, minWidth: 98}}
-                    className="text-sm px-2 py-1 rounded shadow bg-white/90 border flex items-center gap-1"
+                  <div
+                    style={{ position: "absolute", right: 16, bottom: 16, pointerEvents: "auto", zIndex: 20, minWidth: 110 }}
+                    className="flex items-center gap-1 rounded-full border border-border-subtle bg-surface/95 px-3 py-1 text-xs shadow-sm"
                     aria-live="polite">
                     {autosaveStatus === 'error' ? (
-                      <span className="text-red-600">Autosave failed</span>
+                      <span className="text-status-needs-help">Autosave failed</span>
                     ) : (
-                      <span className="text-green-600 flex items-center" title={autosaveTime ? `Last autosaved at ${autosaveTime.toLocaleTimeString()}` : ''}>
+                      <span
+                        className="flex items-center text-status-excellent"
+                        title={autosaveTime ? `Last autosaved at ${autosaveTime.toLocaleTimeString()}` : ""}
+                      >
                         <svg className="inline mr-1" width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 6.293a1 1 0 010 1.414l-7.071 7.071a1 1 0 01-1.414 0l-3.536-3.535a1 1 0 011.414-1.415L9 12.586l6.293-6.293a1 1 0 011.414 0z" /></svg>
                         Autosaved
                       </span>
@@ -292,34 +310,55 @@ export default function StudentAssignment() {
                   </div>
                 </div>
                 {grading === 'grading' && (
-                  <div className="flex flex-col items-center w-full my-8">
-                    <span className="text-blue-700 flex items-center text-lg mb-2"><svg className="animate-spin mr-2" width="20" height="20" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>Grading...</span> 
+                  <div className="my-8 flex w-full flex-col items-center">
+                    <span className="mb-2 flex items-center text-lg text-accent">
+                      <svg className="mr-2 animate-spin" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                      </svg>
+                      Grading…
+                    </span>
                   </div>
                 )}
                 {grading === 'error' && (
-                  <div className="text-red-600 w-full mb-4">Error: {gradeError} <button className="ml-4 underline text-blue-700" onClick={handleGradeAndShowFeedback}>Retry</button></div>
+                  <div className="mb-4 w-full text-status-needs-help">
+                    Error: {gradeError}{" "}
+                    <button className="ml-4 text-accent underline" onClick={handleGradeAndShowFeedback}>
+                      Retry
+                    </button>
+                  </div>
                 )}
                 {grading === 'success' && gradeResult && (
-                  <div className="w-full my-8 text-center">
-                    <div className="font-bold text-green-700 text-xl mb-4">Score: {gradeResult.totalPoints} / {gradeResult.maxPoints}</div>
-                    <div className="mb-6 text-lg">{gradeResult.overallFeedback}</div>
+                  <div className="my-8 w-full text-center">
+                    <div className="mb-4 text-xl font-bold text-status-excellent">
+                      Score: {gradeResult.totalPoints} / {gradeResult.maxPoints}
+                    </div>
+                    <div className="mb-6 text-lg text-secondary">
+                      {gradeResult.overallFeedback}
+                    </div>
                     {currentQuestionIdx < questions.length - 1 && (
-                      <button className="px-8 py-2 text-lg bg-blue-600 text-white rounded shadow font-semibold hover:bg-blue-700 mt-4" onClick={handleAdvanceAfterFeedback}>
+                      <button
+                        className="btn-primary mt-4 px-8 py-2 text-lg"
+                        onClick={handleAdvanceAfterFeedback}
+                      >
                         Continue to Next Question
                       </button>
                     )}
                     {currentQuestionIdx === questions.length - 1 && (
-                      <button className="px-8 py-2 text-lg bg-green-600 text-white rounded shadow font-semibold hover:bg-green-700 mt-4" onClick={handleFinalSubmit}>
+                      <button
+                        className="btn-primary mt-4 bg-status-excellent px-8 py-2 text-lg hover:bg-status-excellent/90"
+                        onClick={handleFinalSubmit}
+                      >
                         Submit Final Assignment
                       </button>
                     )}
                   </div>
                 )}
                 {grading === 'idle' && gradeResult == null && (
-                  <div className="flex gap-5 mt-10">
+                  <div className="mt-10 flex gap-5">
                     {currentQuestionIdx < questions.length - 1 && (
                       <button
-                        className="px-8 py-2 text-lg bg-blue-600 text-white rounded shadow font-semibold hover:bg-blue-700"
+                        className="btn-primary px-8 py-2 text-lg"
                         onClick={handleGradeAndShowFeedback}
                       >
                         Submit & Next Question
@@ -327,7 +366,7 @@ export default function StudentAssignment() {
                     )}
                     {currentQuestionIdx === questions.length - 1 && (
                       <button
-                        className="px-8 py-2 text-lg bg-green-600 text-white rounded shadow font-semibold hover:bg-green-700"
+                        className="btn-primary px-8 py-2 text-lg"
                         onClick={handleGradeAndShowFeedback}
                       >
                         Submit Final Assignment

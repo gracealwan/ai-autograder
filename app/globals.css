@@ -1,26 +1,125 @@
 @import "tailwindcss";
 
+/**
+ * Global design tokens
+ * ------------------------------------------------------------------
+ * These are derived from the product screenshot:
+ * - Soft, mint-tinted page background
+ * - White elevated cards with generous radius + soft shadows
+ * - Green primary accent with traffic‑light status colors
+ * - Neutral gray text hierarchy
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base light theme */
+  --background: #f5faf5; /* page background */
+  --foreground: #0f172a; /* primary text */
 }
 
 @theme inline {
+  /* Color primitives */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-page: #f5faf5;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f1f5f3;
+  --color-surface-subtle: #ecf4ee;
+
+  --color-border-subtle: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  --color-accent: #22c55e; /* primary green */
+  --color-accent-strong: #16a34a;
+  --color-accent-soft: #dcfce7;
+  --color-accent-muted: #bbf7d0;
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #6b7280;
+  --color-text-on-accent: #ffffff;
+
+  /* Aliases for Tailwind color names */
+  --color-primary: var(--color-text-primary);
+  --color-secondary: var(--color-text-secondary);
+  --color-muted: var(--color-text-muted);
+  --color-border: var(--color-border-subtle);
+
+  /* Status / mastery buckets */
+  --color-status-excellent: #16a34a;
+  --color-status-excellent-soft: #dcfce7;
+  --color-status-okay: #f59e0b;
+  --color-status-okay-soft: #fef3c7;
+  --color-status-needs-help: #ef4444;
+  --color-status-needs-help-soft: #fee2e2;
+  --color-status-neutral: #9ca3af;
+  --color-status-neutral-soft: #f3f4f6;
+
+  /* Shadows tuned to soft, elevated cards */
+  --shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 18px 45px rgba(15, 23, 42, 0.12);
+
+  /* Radii (soft-rounded cards, pill buttons) */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Typography */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #020617;
+    --foreground: #e5e7eb;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+
+  /* Soft radial page wash similar to the screenshot */
+  background:
+    radial-gradient(circle at top left, #e3f6ea 0, transparent 55%),
+    radial-gradient(circle at bottom right, #e0f2fe 0, transparent 50%),
+    var(--color-page);
+}
+
+/* Utility classes that map directly to semantic tokens.
+ * These complement Tailwind's generated classes (e.g. bg-surface, text-primary)
+ * with some higher‑level building blocks used across the app.
+ */
+
+.app-shell {
+  @apply min-h-screen flex flex-col;
+}
+
+.page-container {
+  @apply mx-auto w-full max-w-6xl px-6 py-10 md:px-10 md:py-12;
+}
+
+.card-elevated {
+  @apply bg-surface rounded-xl shadow-md border border-border-subtle;
+}
+
+.chip-soft {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-accent-strong transition-colors;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-full bg-surface-soft px-4 py-2 text-sm font-semibold text-secondary border border-border-subtle hover:bg-surface transition-colors;
 }
