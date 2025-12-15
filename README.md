@@ -2,6 +2,8 @@
 
 An AI-assisted grading tool that lets teachers create programming/short-answer assignments, define or generate rubrics with LLMs, and automatically grade student submissions using Supabase-backed storage and OpenRouter models.
 
+Try it out [here](https://ai-autograder-eight.vercel.app/)!
+
 ### Tech Stack
 
 - **Framework**: Next.js (App Router, TypeScript)
